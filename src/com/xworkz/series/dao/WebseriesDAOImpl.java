@@ -230,12 +230,12 @@ public class WebseriesDAOImpl implements WebseriesDAO{
 			
 			while (resultSet.next()) {
 				int id = resultSet.getInt("w_id");
-				String name = resultSet.getString("w_name");
+				/*String name = resultSet.getString("w_name");
 				int w_noOfEpisodes = resultSet.getInt("w_noOfEpisodes");
 				int w_season = resultSet.getInt("w_totalSeason");
 				String w_streamedIn = resultSet.getString("w_+streamedIn");
 				String w_gener = resultSet.getString("w_genre");
-				int  w_yestAgeIndaNodbohudu = resultSet.getInt("w_yestAgeIndaNodbohudu");
+				int  w_yestAgeIndaNodbohudu = resultSet.getInt("w_yestAgeIndaNodbohudu");*/
 				WebseriesDTO dto1 = new WebseriesDTO(name, w_noOfEpisodes, w_season, StreamedIn.valueOf(w_streamedIn),
 						Genre.valueOf(w_gener), w_yestAgeIndaNodbohudu);
 				dto1.setId(id);
