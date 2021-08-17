@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -25,18 +26,13 @@ public class CustomerDAOImpl implements CustomerDAO {
 		try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
 			tempConnection = connection;
 			connection.setAutoCommit(false);
-			String query = "insert into customer_table(c_name,c_from,c_to,c_address,c_married,c_passportNo,c_education)values(?,?,?,?,?,?,?)";
-			PreparedStatement pre = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
-			ResultSet rs = pre.getGeneratedKeys();
-			pre.setString(1, dto.getName());
-			pre.setString(2, dto.getFrom());
-			pre.setString(3, dto.getTo());
-			pre.setString(4, dto.getAddress());
-			pre.setBoolean(5, dto.isMarried());
-			pre.setInt(6, dto.getPassportNo());
-			pre.setString(7, dto.getEducation().toString());
-			if (rs.next()) {
-				temp = rs.getInt(1);
+			String query = "insert into transformers.customer_table(c_name,c_from,c_to,c_address,c_married,c_passportNo,c_education)values(?,?,?,?,?,?,?)";
+			PreparedStatement pre = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+			createFromPrepareStatement(dto,pre);
+			ResultSet res=pre.getGeneratedKeys();
+			if (res.next()) {
+				temp = res.getInt(1);
 			}
 			System.out.println(temp);
 			dto.setId(temp);
@@ -56,11 +52,11 @@ public class CustomerDAOImpl implements CustomerDAO {
 
 	@Override
 	public void saveAll(Collection<CustomerDTO> collection) {
-		Connection tempConnection = null;
+		/*Connection tempConnection = null;
 		try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
 			tempConnection = connection;
 			connection.setAutoCommit(false);
-			String query = "insert into customer_table(c_name,c_from,c_to,c_address,c_married,c_passportNo,c_education)values(?,?,?,?,?,?,?)";
+			String query = "insert into transformers.customer_table(c_name,c_from,c_to,c_address,c_married,c_passportNo,c_education)values(?,?,?,?,?,?,?)";
 			PreparedStatement pre = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
 			collection.forEach(dto -> {
 				try {
@@ -84,14 +80,27 @@ public class CustomerDAOImpl implements CustomerDAO {
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
-		}
+		}*/
+		
+		collection.stream().forEach(dto-> save(dto));
+	}
+	
+	private void createFromPrepareStatement(CustomerDTO dto, PreparedStatement pre) throws SQLException {
+		pre.setString(1, dto.getName());
+		pre.setString(2, dto.getFrom());
+		pre.setString(3, dto.getTo());
+		pre.setString(4, dto.getAddress());
+		pre.setBoolean(5, dto.isMarried());
+		pre.setInt(6, dto.getPassportNo());
+		pre.setString(7, dto.getEducation().toString());
+		pre.execute();
 	}
 
 	@Override
 	public Optional<CustomerDTO> findOne(Predicate<CustomerDTO> predicate) {
 		Optional<CustomerDTO> optional = Optional.empty();
 		try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
-			String query = "select * from customer_table";
+			String query = "select * from transformers.customer_table";
 			PreparedStatement prepare = connection.prepareStatement(query);
 			ResultSet result = prepare.executeQuery();
 
@@ -129,7 +138,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 		Collection<CustomerDTO> collection = new ArrayList<CustomerDTO>();
 
 		try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
-			String query = "select * from customer_table";
+			String query = "select * from transformers.customer_table";
 			PreparedStatement prepare = connection.prepareStatement(query);
 			ResultSet result = prepare.executeQuery();
 
@@ -150,13 +159,15 @@ public class CustomerDAOImpl implements CustomerDAO {
 		Collection<CustomerDTO> collection = new ArrayList<CustomerDTO>();
 
 		try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
-			String query = "select * customer_table";
+			String query = "select  * from transformers.customer_table";
 			PreparedStatement prepare = connection.prepareStatement(query);
 			ResultSet result = prepare.executeQuery();
 
 			while (result.next()) {
 				CustomerDTO dto = createValuesFromResultSet(result);
-				collection.add(dto);
+				if(predicate.test(dto)) {
+								collection.add(dto);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -169,7 +180,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 		Collection<CustomerDTO> collection = new ArrayList<CustomerDTO>();
 		try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
 
-			String query = "select * from customer_table order by c_name desc";
+			String query = "select * from transformers.customer_table order by c_name desc";
 			PreparedStatement prepare = connection.prepareStatement(query);
 			ResultSet result = prepare.executeQuery();
 			while (result.next()) {
@@ -186,7 +197,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 	public int total() {
 		int total = 0;
 		try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
-			String query = "SELECT count(c_name) from customer_table";
+			String query = "select count(c_name) from transformers.customer_table";
 			PreparedStatement prepare = connection.prepareStatement(query);
 			prepare.execute();
 			ResultSet result = prepare.executeQuery();

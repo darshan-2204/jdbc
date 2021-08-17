@@ -50,27 +50,27 @@ public class CustomerServiceImpl implements CustomerService {
 			}
 			String address = dto.getAddress();
 			if (address != null && !address.isEmpty() && address.length() >= 4 && address.length() <= 20) {
-				System.out.println("to is valid");
+				System.out.println("address is valid");
 				addressValid = true;
 			} else {
-				System.out.println("to is invalid");
+				System.out.println("address is invalid");
 				addressValid = false;
 			}
 			Boolean married = dto.isMarried();
 			if (married != false) {
-				System.out.println("to is valid");
+				System.out.println("Married is valid");
 				marriedValid = true;
 			} else {
-				System.out.println("to is invalid");
+				System.out.println("Married is invalid");
 				marriedValid = false;
 			}
 
 			int passport = dto.getPassportNo();
 			if (passport != 0 && passport >= 4 && passport <= 15) {
-				System.out.println("to is valid");
+				System.out.println("passport is valid");
 				passportValid = true;
 			} else {
-				System.out.println("to is invalid");
+				System.out.println("passport is invalid");
 				passportValid = false;
 			}
 			Education education = dto.getEducation();
@@ -82,6 +82,7 @@ public class CustomerServiceImpl implements CustomerService {
 				educationValid = false;
 			}
 			if (nameValid && fromValid && toValid && addressValid && marriedValid && passportValid && educationValid) {
+				dao.save(dto);
 				System.out.println("data is valid returning success");
 				return 1;
 			}
@@ -94,7 +95,11 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void saveAll(Collection<CustomerDTO> collection) {
-		dao.saveAll(collection);
+		if (!collection.isEmpty()) {
+			collection.forEach(dto -> {
+				this.save(dto);
+			});
+		}
 
 	}
 
